@@ -1,6 +1,9 @@
 "$schema" = "./node_modules/wrangler/config-schema.json"
 name = "sweet-feather-6292"
 compatibility_date = "2026-05-29"
+main = "./src/index.js"
 
 [assets]
 directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
