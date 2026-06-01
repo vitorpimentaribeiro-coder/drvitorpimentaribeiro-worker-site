@@ -529,7 +529,7 @@ h3 {
 
 .trust-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
@@ -574,6 +574,70 @@ h3 {
 .trust-grid p {
   margin: 6px 0 0;
   font-size: 16px;
+}
+
+.appointment-strip {
+  padding: 62px 0 72px;
+  background: linear-gradient(180deg, var(--paper), var(--surface));
+}
+
+.appointment-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.86fr) minmax(0, 1.4fr);
+  gap: 44px;
+  align-items: start;
+}
+
+.appointment-heading h2 {
+  font-size: 34px;
+}
+
+.appointment-steps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: appointment-step;
+}
+
+.appointment-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 18px;
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+  counter-increment: appointment-step;
+}
+
+.appointment-steps li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.appointment-steps li::before {
+  content: counter(appointment-step);
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(201, 154, 74, 0.56);
+  border-radius: 50%;
+  color: var(--green-950);
+  background: var(--gold-100);
+  font-weight: 800;
+}
+
+.appointment-steps strong {
+  display: block;
+  color: var(--green-950);
+  font-size: 19px;
+}
+
+.appointment-steps span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
 }
 
 .section {
@@ -1465,8 +1529,16 @@ h3 {
     border-top: 1px solid var(--line);
   }
 
-  .trust-grid > div:first-child + div {
+  .trust-grid > div:nth-child(-n + 2) {
     border-top: 0;
+  }
+
+  .trust-grid > div:nth-child(even) {
+    border-left: 1px solid var(--line);
+  }
+
+  .appointment-layout {
+    grid-template-columns: 1fr;
   }
 
   .split-layout,
@@ -1551,8 +1623,32 @@ h3 {
   }
 
   .trust-grid > div,
-  .trust-grid > div:first-child + div {
+  .trust-grid > div:nth-child(-n + 2),
+  .trust-grid > div:nth-child(even) {
+    border-left: 0;
+  }
+
+  .trust-grid > div,
+  .trust-grid > div:nth-child(-n + 2) {
     border-top: 1px solid var(--line);
+  }
+
+  .appointment-strip {
+    padding: 52px 0;
+  }
+
+  .appointment-heading h2 {
+    font-size: 30px;
+  }
+
+  .appointment-steps li {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .appointment-steps li::before {
+    width: 36px;
+    height: 36px;
   }
 
   .identity-panel {

@@ -23,10 +23,13 @@ if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loade
 }
 
 const trackAdministrativeAction = (eventName, element) => {
+  const href = element?.getAttribute?.("href") || "";
   const payload = {
     event_category: "administrative_contact",
     event_label: element?.textContent?.trim().slice(0, 80) || element?.getAttribute?.("aria-label") || eventName,
-    page_path: window.location.pathname
+    page_path: window.location.pathname,
+    destination_url: href,
+    conversion_action: eventName
   };
 
   if (typeof window.gtag === "function") {
