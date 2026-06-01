@@ -2,6 +2,25 @@ const header = document.querySelector("[data-header]");
 const menuButton = document.querySelector("[data-menu-button]");
 const nav = document.querySelector("[data-nav]");
 const year = document.querySelector("[data-year]");
+const ga4MeasurementId = window.DIGITAL_PRESENCE_GA4_ID || document.documentElement.dataset.ga4Id || "";
+
+if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loaded) {
+  window.__digitalPresenceGa4Loaded = true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag() {
+    window.dataLayer.push(arguments);
+  };
+  window.gtag("js", new Date());
+  window.gtag("config", ga4MeasurementId, {
+    anonymize_ip: true,
+    send_page_view: true
+  });
+
+  const ga4Script = document.createElement("script");
+  ga4Script.async = true;
+  ga4Script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4MeasurementId)}`;
+  document.head.appendChild(ga4Script);
+}
 
 const trackAdministrativeAction = (eventName, element) => {
   const payload = {
