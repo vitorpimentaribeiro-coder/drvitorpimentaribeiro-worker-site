@@ -354,6 +354,14 @@ h3 {
   font-size: 22px;
 }
 
+.hero-credentials {
+  max-width: 650px;
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  font-weight: 800;
+}
+
 .hero-actions,
 .location-actions {
   display: flex;
@@ -1249,6 +1257,22 @@ h3 {
   color: var(--muted);
 }
 
+.profile-card {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-card img {
+  width: 180px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 14px 30px rgba(0, 61, 52, 0.16);
+}
+
 .service-detail-note {
   display: grid;
   gap: 6px;
@@ -1498,6 +1522,10 @@ h3 {
     font-size: 19px;
   }
 
+  .hero-credentials {
+    font-size: 14px;
+  }
+
   .button {
     width: 100%;
   }
@@ -1542,6 +1570,10 @@ h3 {
   .service-card {
     min-height: auto;
     padding: 24px;
+  }
+
+  .profile-card {
+    grid-template-columns: 1fr;
   }
 
   .audience-item {
