@@ -3,6 +3,22 @@ const menuButton = document.querySelector("[data-menu-button]");
 const nav = document.querySelector("[data-nav]");
 const year = document.querySelector("[data-year]");
 
+const trackAdministrativeAction = (eventName, element) => {
+  const payload = {
+    event_category: "administrative_contact",
+    event_label: element?.textContent?.trim().slice(0, 80) || element?.getAttribute?.("aria-label") || eventName,
+    page_path: window.location.pathname
+  };
+
+  if (typeof window.gtag === "function") {
+    window.gtag("event", eventName, payload);
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: eventName, ...payload });
+};
+
 if (year) {
   year.textContent = new Date().getFullYear();
 }
@@ -65,5 +81,20 @@ document.querySelectorAll("[data-load-map]").forEach((button) => {
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
     iframe.src = src;
     shell.replaceWith(iframe);
+    trackAdministrativeAction("map_embed_load", button);
+  });
+});
+
+document.querySelectorAll("a[href]").forEach((link) => {
+  link.addEventListener("click", () => {
+    const href = link.getAttribute("href") || "";
+
+    if (href.startsWith("https://wa.me/")) {
+      trackAdministrativeAction("whatsapp_click", link);
+    } else if (href.startsWith("tel:")) {
+      trackAdministrativeAction("phone_click", link);
+    } else if (href.includes("google.com/maps")) {
+      trackAdministrativeAction("route_click", link);
+    }
   });
 });

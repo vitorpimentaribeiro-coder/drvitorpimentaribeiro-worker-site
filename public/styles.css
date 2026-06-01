@@ -273,6 +273,14 @@ textarea {
   transform: scale(1.02);
 }
 
+@supports (background-image: image-set(url("assets/hero-cardiologia.webp") type("image/webp"))) {
+  .hero-media {
+    background-image:
+      linear-gradient(90deg, rgba(0, 61, 52, 0.96) 0%, rgba(0, 61, 52, 0.82) 48%, rgba(0, 61, 52, 0.36) 100%),
+      image-set(url("assets/hero-cardiologia.webp") type("image/webp"), url("assets/hero-cardiologia.png") type("image/png"));
+  }
+}
+
 .hero-media::after {
   content: "";
   position: absolute;
