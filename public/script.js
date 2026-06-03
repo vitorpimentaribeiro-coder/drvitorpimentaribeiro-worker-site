@@ -3,6 +3,7 @@ const menuButton = document.querySelector("[data-menu-button]");
 const nav = document.querySelector("[data-nav]");
 const year = document.querySelector("[data-year]");
 const ga4MeasurementId = window.DIGITAL_PRESENCE_GA4_ID || document.documentElement.dataset.ga4Id || "";
+const gtmContainerId = window.DIGITAL_PRESENCE_GTM_ID || document.documentElement.dataset.gtmId || "";
 
 if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loaded) {
   window.__digitalPresenceGa4Loaded = true;
@@ -20,6 +21,20 @@ if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loade
   ga4Script.async = true;
   ga4Script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4MeasurementId)}`;
   document.head.appendChild(ga4Script);
+}
+
+if (/^GTM-[A-Z0-9]+$/i.test(gtmContainerId) && !window.__digitalPresenceGtmLoaded) {
+  window.__digitalPresenceGtmLoaded = true;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    "gtm.start": new Date().getTime(),
+    event: "gtm.js"
+  });
+
+  const gtmScript = document.createElement("script");
+  gtmScript.async = true;
+  gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`;
+  document.head.appendChild(gtmScript);
 }
 
 const trackAdministrativeAction = (eventName, element) => {
