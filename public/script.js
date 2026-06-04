@@ -146,6 +146,8 @@ const writeAnalyticsDebugEvent = (eventName, payload) => {
   document.documentElement.dataset.analyticsEvents = JSON.stringify(events.slice(-50));
 };
 
+let requestGa4ScriptLoad = () => {};
+
 const sendAnalyticsEvent = (eventName, payload = {}) => {
   const eventPayload = {
     event_version: "medical_local_presence_v2",
@@ -178,10 +180,35 @@ if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loade
     send_page_view: true
   });
 
-  const ga4Script = document.createElement("script");
-  ga4Script.async = true;
-  ga4Script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4MeasurementId)}`;
-  document.head.appendChild(ga4Script);
+  requestGa4ScriptLoad = () => {
+    if (window.__digitalPresenceGa4ScriptRequested) {
+      return;
+    }
+
+    window.__digitalPresenceGa4ScriptRequested = true;
+
+    const ga4Script = document.createElement("script");
+    ga4Script.async = true;
+    ga4Script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(ga4MeasurementId)}`;
+    document.head.appendChild(ga4Script);
+  };
+
+  const scheduleGa4ScriptLoad = () => {
+    const loadAfterInitialRender = () => window.setTimeout(requestGa4ScriptLoad, 3500);
+
+    if (document.readyState === "complete") {
+      loadAfterInitialRender();
+    } else {
+      window.addEventListener("load", loadAfterInitialRender, { once: true });
+    }
+
+    window.addEventListener("pointerdown", requestGa4ScriptLoad, { once: true, passive: true });
+    window.addEventListener("touchstart", requestGa4ScriptLoad, { once: true, passive: true });
+    window.addEventListener("scroll", requestGa4ScriptLoad, { once: true, passive: true });
+    window.addEventListener("keydown", requestGa4ScriptLoad, { once: true });
+  };
+
+  scheduleGa4ScriptLoad();
 }
 
 if (/^GTM-[A-Z0-9]+$/i.test(gtmContainerId) && !window.__digitalPresenceGtmLoaded) {
