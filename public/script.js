@@ -4,6 +4,167 @@ const nav = document.querySelector("[data-nav]");
 const year = document.querySelector("[data-year]");
 const ga4MeasurementId = window.DIGITAL_PRESENCE_GA4_ID || document.documentElement.dataset.ga4Id || "";
 const gtmContainerId = window.DIGITAL_PRESENCE_GTM_ID || document.documentElement.dataset.gtmId || "";
+const observedSections = new Set();
+const observedScrollDepths = new Set();
+const analyticsDebugMode = new URLSearchParams(window.location.search).has("codexAnalyticsDebug");
+
+const getText = (element, fallback = "") => (
+  element?.textContent?.trim().replace(/\s+/g, " ").slice(0, 90)
+  || element?.getAttribute?.("aria-label")?.slice(0, 90)
+  || fallback
+);
+
+const getPageType = () => {
+  const path = window.location.pathname.replace(/\/index\.html$/, "/");
+
+  if (path === "/" || path === "/index.html") {
+    return "home";
+  }
+
+  if (path.includes("consulta-cardiologica")) {
+    return "consulta_cardiologica";
+  }
+
+  if (path.includes("eletrocardiograma")) {
+    return "eletrocardiograma";
+  }
+
+  if (path.includes("sobre-dr-vitor")) {
+    return "sobre";
+  }
+
+  if (path.includes("servicos")) {
+    return "servicos";
+  }
+
+  if (path.includes("privacidade")) {
+    return "privacidade";
+  }
+
+  return "site_page";
+};
+
+const getSectionContext = (element) => {
+  const section = element?.closest?.("section, article, header, footer, nav");
+
+  if (!section) {
+    return {
+      section_id: "page",
+      section_label: "Pagina",
+      section_type: "page"
+    };
+  }
+
+  const heading = section.querySelector("h1, h2, h3");
+
+  return {
+    section_id: section.id || section.getAttribute("aria-label") || section.className?.toString().split(" ")[0] || section.tagName.toLowerCase(),
+    section_label: getText(heading, section.getAttribute("aria-label") || section.tagName.toLowerCase()),
+    section_type: section.tagName.toLowerCase()
+  };
+};
+
+const sanitizeUrl = (href) => {
+  if (!href) {
+    return "";
+  }
+
+  try {
+    const url = new URL(href, window.location.href);
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  } catch {
+    return href.split("?")[0].split("#")[0];
+  }
+};
+
+const getLinkMeta = (link) => {
+  const rawHref = link?.getAttribute?.("href") || "";
+  const sanitized = sanitizeUrl(rawHref);
+  const hasHref = rawHref.length > 0;
+  let parsedUrl;
+
+  try {
+    if (!hasHref) {
+      throw new Error("missing href");
+    }
+
+    parsedUrl = new URL(rawHref, window.location.href);
+  } catch {
+    parsedUrl = null;
+  }
+
+  const isWhatsapp = parsedUrl?.hostname === "wa.me" || parsedUrl?.hostname.endsWith(".whatsapp.com");
+  const isPhone = rawHref.startsWith("tel:");
+  const isRoute = Boolean(parsedUrl?.hostname.includes("google.") && parsedUrl?.pathname.includes("/maps"));
+  const isInternal = parsedUrl ? parsedUrl.hostname === window.location.hostname : rawHref.startsWith("#") || rawHref.startsWith("/");
+  const isServiceInterest = Boolean(link?.closest?.(".service-card, .service-card-link, .service-detail-card"));
+
+  return {
+    link_url: sanitized,
+    link_domain: parsedUrl?.hostname || "",
+    link_path: parsedUrl?.pathname || "",
+    link_text: getText(link, "link"),
+    isWhatsapp,
+    isPhone,
+    isRoute,
+    isInternal: hasHref ? isInternal : false,
+    isServiceInterest
+  };
+};
+
+const getClickBucket = (event) => {
+  const doc = document.documentElement;
+  const width = Math.max(doc.scrollWidth, window.innerWidth || 1);
+  const height = Math.max(doc.scrollHeight, window.innerHeight || 1);
+  const x = Math.max(0, Math.min(100, Math.round(((event.pageX || 0) / width) * 10) * 10));
+  const y = Math.max(0, Math.min(100, Math.round(((event.pageY || 0) / height) * 10) * 10));
+
+  return {
+    click_x_bucket: x,
+    click_y_bucket: y,
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight
+  };
+};
+
+const writeAnalyticsDebugEvent = (eventName, payload) => {
+  if (!analyticsDebugMode) {
+    return;
+  }
+
+  let events = [];
+
+  try {
+    events = JSON.parse(document.documentElement.dataset.analyticsEvents || "[]");
+  } catch {
+    events = [];
+  }
+
+  events.push({ eventName, payload });
+  document.documentElement.dataset.analyticsEvents = JSON.stringify(events.slice(-50));
+};
+
+const sendAnalyticsEvent = (eventName, payload = {}) => {
+  const eventPayload = {
+    event_version: "medical_local_presence_v2",
+    page_path: window.location.pathname || "/",
+    page_type: getPageType(),
+    page_title: document.title,
+    ...payload
+  };
+
+  writeAnalyticsDebugEvent(eventName, eventPayload);
+
+  if (typeof window.gtag === "function") {
+    window.gtag("event", eventName, eventPayload);
+    return;
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: eventName, ...eventPayload });
+};
 
 if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loaded) {
   window.__digitalPresenceGa4Loaded = true;
@@ -37,23 +198,24 @@ if (/^GTM-[A-Z0-9]+$/i.test(gtmContainerId) && !window.__digitalPresenceGtmLoade
   document.head.appendChild(gtmScript);
 }
 
-const trackAdministrativeAction = (eventName, element) => {
-  const href = element?.getAttribute?.("href") || "";
+const trackAdministrativeAction = (eventName, element, event = null) => {
+  const linkMeta = getLinkMeta(element);
+  const sectionContext = getSectionContext(element);
+  const clickBucket = event ? getClickBucket(event) : {};
+  const contactMethod = eventName.replace("_click", "").replace("map_embed_load", "map");
   const payload = {
     event_category: "administrative_contact",
-    event_label: element?.textContent?.trim().slice(0, 80) || element?.getAttribute?.("aria-label") || eventName,
-    page_path: window.location.pathname,
-    destination_url: href,
-    conversion_action: eventName
+    event_label: linkMeta.link_text || eventName,
+    conversion_action: eventName,
+    contact_method: contactMethod,
+    funnel_step: "contact_intent",
+    ...sectionContext,
+    ...linkMeta,
+    ...clickBucket
   };
 
-  if (typeof window.gtag === "function") {
-    window.gtag("event", eventName, payload);
-    return;
-  }
-
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event: eventName, ...payload });
+  sendAnalyticsEvent(eventName, payload);
+  sendAnalyticsEvent("lead_intent", payload);
 };
 
 if (year) {
@@ -70,6 +232,11 @@ menuButton?.addEventListener("click", () => {
   const isOpen = document.body.classList.toggle("nav-open");
   nav?.classList.toggle("is-open", isOpen);
   menuButton.setAttribute("aria-expanded", String(isOpen));
+  sendAnalyticsEvent(isOpen ? "menu_open" : "menu_close", {
+    event_category: "navigation",
+    event_label: isOpen ? "Abrir menu" : "Fechar menu",
+    funnel_step: "navigation"
+  });
 });
 
 nav?.querySelectorAll("a").forEach((link) => {
@@ -97,6 +264,61 @@ if ("IntersectionObserver" in window) {
   revealItems.forEach((item) => item.classList.add("is-visible"));
 }
 
+const trackSectionView = (target) => {
+  const context = getSectionContext(target);
+  const key = `${context.section_id}:${context.section_label}`;
+
+  if (observedSections.has(key)) {
+    return;
+  }
+
+  observedSections.add(key);
+  sendAnalyticsEvent("section_view", {
+    event_category: "engagement",
+    event_label: context.section_label,
+    funnel_step: "section_view",
+    ...context
+  });
+};
+
+const sectionTargets = document.querySelectorAll("section, article.service-detail-card, footer.site-footer");
+
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        trackSectionView(entry.target);
+        sectionObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.42 });
+
+  sectionTargets.forEach((section) => sectionObserver.observe(section));
+} else {
+  sectionTargets.forEach(trackSectionView);
+}
+
+const trackScrollDepth = () => {
+  const doc = document.documentElement;
+  const scrollable = Math.max(1, doc.scrollHeight - window.innerHeight);
+  const currentDepth = Math.min(100, Math.round((window.scrollY / scrollable) * 100));
+
+  [25, 50, 75, 90].forEach((depth) => {
+    if (currentDepth >= depth && !observedScrollDepths.has(depth)) {
+      observedScrollDepths.add(depth);
+      sendAnalyticsEvent("scroll_depth", {
+        event_category: "engagement",
+        event_label: `${depth}%`,
+        funnel_step: "scroll_depth",
+        scroll_depth: depth
+      });
+    }
+  });
+};
+
+trackScrollDepth();
+window.addEventListener("scroll", trackScrollDepth, { passive: true });
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeMenu();
@@ -104,7 +326,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.querySelectorAll("[data-load-map]").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", (event) => {
     const shell = button.closest("[data-map-shell]");
     const src = button.getAttribute("data-map-src");
 
@@ -117,21 +339,63 @@ document.querySelectorAll("[data-load-map]").forEach((button) => {
     iframe.loading = "lazy";
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
     iframe.src = src;
+    trackAdministrativeAction("map_embed_load", button, event);
     shell.replaceWith(iframe);
-    trackAdministrativeAction("map_embed_load", button);
   });
 });
 
 document.querySelectorAll("a[href]").forEach((link) => {
-  link.addEventListener("click", () => {
-    const href = link.getAttribute("href") || "";
+  link.addEventListener("click", (event) => {
+    const linkMeta = getLinkMeta(link);
+    const sectionContext = getSectionContext(link);
+    const clickBucket = getClickBucket(event);
+    const basePayload = {
+      event_category: "navigation",
+      event_label: linkMeta.link_text,
+      funnel_step: "click",
+      ...sectionContext,
+      ...linkMeta,
+      ...clickBucket
+    };
 
-    if (href.startsWith("https://wa.me/")) {
-      trackAdministrativeAction("whatsapp_click", link);
-    } else if (href.startsWith("tel:")) {
-      trackAdministrativeAction("phone_click", link);
-    } else if (href.includes("google.com/maps")) {
-      trackAdministrativeAction("route_click", link);
+    if (analyticsDebugMode && (linkMeta.isWhatsapp || linkMeta.isPhone || linkMeta.isRoute)) {
+      event.preventDefault();
+    }
+
+    if (link.closest("[data-nav]")) {
+      sendAnalyticsEvent("navigation_click", {
+        ...basePayload,
+        funnel_step: "navigation"
+      });
+    }
+
+    if (
+      link.classList.contains("button")
+      || link.classList.contains("nav-cta")
+      || link.classList.contains("floating-whatsapp")
+      || link.closest(".contact-list")
+    ) {
+      sendAnalyticsEvent("cta_click", {
+        ...basePayload,
+        event_category: "call_to_action",
+        funnel_step: "cta_click"
+      });
+    }
+
+    if (linkMeta.isServiceInterest) {
+      sendAnalyticsEvent("service_interest_click", {
+        ...basePayload,
+        event_category: "service_interest",
+        funnel_step: "service_interest"
+      });
+    }
+
+    if (linkMeta.isWhatsapp) {
+      trackAdministrativeAction("whatsapp_click", link, event);
+    } else if (linkMeta.isPhone) {
+      trackAdministrativeAction("phone_click", link, event);
+    } else if (linkMeta.isRoute) {
+      trackAdministrativeAction("route_click", link, event);
     }
   });
 });
