@@ -947,17 +947,18 @@ h3 {
 
 .service-svg {
   display: block;
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   color: var(--green-950);
 }
 
 .svg-stroke {
   fill: none;
   stroke: currentColor;
-  stroke-width: 3;
+  stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .svg-gold {
@@ -972,76 +973,8 @@ h3 {
 .svg-text {
   fill: var(--green-950);
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 10px;
+  font-size: 6.5px;
   font-weight: 800;
-}
-
-.service-icon {
-  position: relative;
-  display: block;
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  background: var(--green-100);
-  color: var(--green-950);
-}
-
-.pulse-line::before,
-.ecg::before,
-.rhythm::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 21px;
-  width: 28px;
-  height: 2px;
-  background: currentColor;
-  box-shadow: 8px -8px 0 -1px currentColor, 16px 7px 0 -1px currentColor;
-}
-
-.checklist::before {
-  content: "";
-  position: absolute;
-  left: 13px;
-  top: 13px;
-  width: 17px;
-  height: 10px;
-  border-left: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
-  transform: rotate(-45deg);
-}
-
-.monitor::before {
-  content: "";
-  position: absolute;
-  left: 9px;
-  top: 10px;
-  width: 26px;
-  height: 18px;
-  border: 2px solid currentColor;
-  border-radius: 3px;
-}
-
-.monitor::after {
-  content: "";
-  position: absolute;
-  left: 17px;
-  bottom: 9px;
-  width: 10px;
-  height: 2px;
-  background: currentColor;
-}
-
-.steps::before {
-  content: "";
-  position: absolute;
-  left: 10px;
-  top: 12px;
-  width: 24px;
-  height: 18px;
-  border-left: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
-  transform: skewX(-18deg);
 }
 
 .exam-section {
