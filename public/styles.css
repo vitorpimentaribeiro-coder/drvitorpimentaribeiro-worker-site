@@ -528,7 +528,7 @@ h3 {
 .trust-label {
   display: block;
   margin-bottom: 7px;
-  color: var(--green-700);
+  color: var(--green-900);
   font-size: 14px;
   font-weight: 800;
   text-transform: uppercase;
