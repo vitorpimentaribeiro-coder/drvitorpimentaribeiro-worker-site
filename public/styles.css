@@ -202,12 +202,16 @@ textarea {
 
 .menu-button {
   display: none;
+  align-items: center;
+  justify-content: center;
   width: 46px;
   height: 46px;
+  padding: 0;
   border: 1px solid rgba(0, 61, 52, 0.18);
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
+  line-height: 0;
 }
 
 .menu-icon,
@@ -216,7 +220,7 @@ textarea {
   display: block;
   width: 22px;
   height: 2px;
-  margin: auto;
+  margin: 0;
   border-radius: 999px;
   background: var(--green-950);
   transition: transform 180ms ease, opacity 180ms ease;
@@ -308,7 +312,7 @@ textarea {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 48px;
   align-items: center;
-  padding: 74px 0 64px;
+  padding: 66px 0 58px;
 }
 
 .hero-copy {
@@ -429,49 +433,27 @@ h3 {
   flex: 0 0 auto;
   width: 18px;
   height: 18px;
-  overflow: visible;
+  overflow: hidden;
+}
+
+.icon-message,
+.icon-pin,
+.icon-phone {
+  background-color: currentColor;
+  -webkit-mask: var(--icon-mask) center / contain no-repeat;
+  mask: var(--icon-mask) center / contain no-repeat;
 }
 
 .icon-message {
-  border: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-.icon-message::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  bottom: -2px;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(28deg);
+  --icon-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M4.8%203.5h14.4A2.8%202.8%200%200%201%2022%206.3v8.9a2.8%202.8%200%200%201-2.8%202.8H9.1L4%2021.4v-3.7a2.8%202.8%200%200%201-2-2.7V6.3a2.8%202.8%200%200%201%202.8-2.8Zm0%202A.8.8%200%200%200%204%206.3V15c0%20.4.3.8.8.8H6v1.9l2.5-1.7h10.7c.4%200%20.8-.3.8-.8V6.3c0-.4-.3-.8-.8-.8H4.8Z'/%3E%3C/svg%3E");
 }
 
 .icon-pin {
-  border: 2px solid currentColor;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-}
-
-.icon-pin::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
+  --icon-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M12%202a7%207%200%200%200-7%207c0%205.2%207%2013%207%2013s7-7.8%207-13a7%207%200%200%200-7-7Zm0%209.5A2.5%202.5%200%201%201%2012%206a2.5%202.5%200%200%201%200%205.5Z'/%3E%3C/svg%3E");
 }
 
 .icon-phone {
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-right-color: transparent;
-  border-radius: 50%;
-  transform: rotate(-38deg);
+  --icon-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20d='M6.6%202.8c.4-.3%201-.3%201.4.1l2.6%202.6c.4.4.5%201%20.2%201.5L9.6%209c.9%201.8%202.4%203.3%204.2%204.2l2-1.2c.5-.3%201.1-.2%201.5.2l2.6%202.6c.4.4.4%201%20.1%201.4l-1.8%202.6c-.4.6-1.1.9-1.8.8C9.9%2018.8%205.2%2014.1%204.4%207.6c-.1-.7.2-1.4.8-1.8l1.4-1Z'/%3E%3C/svg%3E");
 }
 
 .contact-note {
@@ -483,7 +465,7 @@ h3 {
 
 .hero-photo-card {
   justify-self: end;
-  width: min(100%, 300px);
+  width: min(100%, 282px);
   margin: 0;
   border: 1px solid rgba(201, 154, 74, 0.45);
   border-radius: 8px;
@@ -494,9 +476,9 @@ h3 {
 
 .hero-photo-card img {
   width: 100%;
-  max-width: 243px;
+  max-width: 220px;
   height: auto;
-  margin: 24px auto 0;
+  margin: 18px auto 0;
   border-radius: 8px;
   object-fit: cover;
   box-shadow: 0 12px 26px rgba(0, 61, 52, 0.18);
@@ -505,7 +487,7 @@ h3 {
 .hero-photo-card figcaption {
   display: grid;
   gap: 4px;
-  padding: 18px 20px 22px;
+  padding: 14px 16px 18px;
   color: var(--green-950);
   text-align: center;
 }
@@ -750,13 +732,13 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-  padding: 24px;
+  padding: 22px;
   box-shadow: var(--shadow-soft);
 }
 
 .doctor-card img {
   width: 100%;
-  max-width: 243px;
+  max-width: 220px;
   height: auto;
   margin-inline: auto;
   border-radius: 8px;
@@ -1443,8 +1425,7 @@ h3 {
   }
 
   .menu-button {
-    display: inline-grid;
-    place-items: center;
+    display: inline-flex;
   }
 
   .main-nav {
@@ -1521,7 +1502,7 @@ h3 {
 
   .hero-photo-card {
     justify-self: start;
-    width: min(100%, 290px);
+    width: min(100%, 276px);
   }
 
   .trust-grid,
@@ -1662,7 +1643,7 @@ h3 {
   }
 
   .hero-photo-card {
-    width: min(100%, 268px);
+    width: min(100%, 256px);
   }
 
   .credential-list {
