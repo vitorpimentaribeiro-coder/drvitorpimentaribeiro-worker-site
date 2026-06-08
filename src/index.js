@@ -5,6 +5,8 @@ const LEGACY_REDIRECTS = new Map([
   ["/servicos.html", "/servicos"],
   ["/privacidade.html", "/privacidade"],
   ["/eletrocardiograma-nova-friburgo.html", "/eletrocardiograma-nova-friburgo"],
+  ["/mapa-24h-nova-friburgo.html", "/mapa-24h-nova-friburgo"],
+  ["/holter-24h-nova-friburgo.html", "/holter-24h-nova-friburgo"],
   ["/consulta-cardiologica-nova-friburgo.html", "/consulta-cardiologica-nova-friburgo"],
   ["/sobre-dr-vitor-pimenta-ribeiro.html", "/sobre-dr-vitor-pimenta-ribeiro"],
 ]);
@@ -13,6 +15,7 @@ function canonicalUrl(requestUrl, pathname = requestUrl.pathname) {
   const url = new URL(requestUrl);
   url.protocol = "https:";
   url.hostname = CANONICAL_HOST;
+  url.port = "";
   url.pathname = pathname;
   return url;
 }

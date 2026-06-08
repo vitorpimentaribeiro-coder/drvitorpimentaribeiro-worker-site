@@ -1295,6 +1295,41 @@ h3 {
   font-size: 21px;
 }
 
+.service-hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+}
+
+.service-hero-copy {
+  min-width: 0;
+}
+
+.service-hero-media {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(224, 193, 123, 0.34);
+  border-radius: 8px;
+  background: rgba(0, 31, 27, 0.52);
+  box-shadow: 0 24px 80px rgba(0, 31, 27, 0.32);
+}
+
+.service-hero-media img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.service-hero-media figcaption {
+  padding: 12px 14px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .service-detail-section {
   background: var(--surface-muted);
 }
@@ -1513,6 +1548,14 @@ h3 {
     max-width: 720px;
   }
 
+  .service-hero-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .service-hero-media {
+    max-width: 760px;
+  }
+
   .hero-photo-card {
     justify-self: start;
     width: min(100%, 276px);
@@ -1609,6 +1652,14 @@ h3 {
   .hero-actions,
   .location-actions {
     width: 100%;
+  }
+
+  .service-hero-layout {
+    gap: 28px;
+  }
+
+  .service-hero-media figcaption {
+    font-size: 12px;
   }
 
   .trust-strip {

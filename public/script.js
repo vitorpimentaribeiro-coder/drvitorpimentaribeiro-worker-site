@@ -29,6 +29,14 @@ const getPageType = () => {
     return "eletrocardiograma";
   }
 
+  if (path.includes("mapa-24h")) {
+    return "mapa_24h";
+  }
+
+  if (path.includes("holter-24h")) {
+    return "holter_24h";
+  }
+
   if (path.includes("sobre-dr-vitor")) {
     return "sobre";
   }
