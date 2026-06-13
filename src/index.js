@@ -9,6 +9,7 @@ const LEGACY_REDIRECTS = new Map([
   ["/holter-24h-nova-friburgo.html", "/holter-24h-nova-friburgo"],
   ["/consulta-cardiologica-nova-friburgo.html", "/consulta-cardiologica-nova-friburgo"],
   ["/sobre-dr-vitor-pimenta-ribeiro.html", "/sobre-dr-vitor-pimenta-ribeiro"],
+  ["/agendar.html", "/agendar"],
 ]);
 
 function canonicalUrl(requestUrl, pathname = requestUrl.pathname) {
@@ -27,8 +28,10 @@ function shouldCanonicalize(url) {
 function applySecurityHeaders(headers) {
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), payment=(), usb=(), interest-cohort=()");
+  headers.set("Content-Security-Policy", "base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests");
 }
 
 function applyCacheHeaders(headers, url, status) {

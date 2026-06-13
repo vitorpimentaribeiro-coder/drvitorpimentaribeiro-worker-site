@@ -6,7 +6,20 @@ const ga4MeasurementId = window.DIGITAL_PRESENCE_GA4_ID || document.documentElem
 const gtmContainerId = window.DIGITAL_PRESENCE_GTM_ID || document.documentElement.dataset.gtmId || "";
 const observedSections = new Set();
 const observedScrollDepths = new Set();
-const analyticsDebugMode = new URLSearchParams(window.location.search).has("codexAnalyticsDebug");
+const analyticsSearchParams = new URLSearchParams(window.location.search);
+const analyticsDebugMode = analyticsSearchParams.has("codexAnalyticsDebug");
+const analyticsInternalMode = Array.from(analyticsSearchParams.keys()).some((key) => key.toLowerCase().startsWith("codex"));
+const analyticsInternalTrafficParams = analyticsInternalMode ? { traffic_type: "internal" } : {};
+const analyticsAttributionParams = {
+  utm_source: analyticsSearchParams.get("utm_source") || "",
+  utm_medium: analyticsSearchParams.get("utm_medium") || "",
+  utm_campaign: analyticsSearchParams.get("utm_campaign") || "",
+  utm_content: analyticsSearchParams.get("utm_content") || "",
+  entry_source: analyticsSearchParams.get("source") || analyticsSearchParams.get("origem") || ""
+};
+const compactAnalyticsAttributionParams = Object.fromEntries(
+  Object.entries(analyticsAttributionParams).filter(([, value]) => value)
+);
 
 const getText = (element, fallback = "") => (
   element?.textContent?.trim().replace(/\s+/g, " ").slice(0, 90)
@@ -35,6 +48,10 @@ const getPageType = () => {
 
   if (path.includes("holter-24h")) {
     return "holter_24h";
+  }
+
+  if (path.includes("agendar")) {
+    return "agendamento_gbp";
   }
 
   if (path.includes("sobre-dr-vitor")) {
@@ -162,6 +179,8 @@ const sendAnalyticsEvent = (eventName, payload = {}) => {
     page_path: window.location.pathname || "/",
     page_type: getPageType(),
     page_title: document.title,
+    ...analyticsInternalTrafficParams,
+    ...compactAnalyticsAttributionParams,
     ...payload
   };
 
@@ -185,7 +204,8 @@ if (/^G-[A-Z0-9]+$/i.test(ga4MeasurementId) && !window.__digitalPresenceGa4Loade
   window.gtag("js", new Date());
   window.gtag("config", ga4MeasurementId, {
     anonymize_ip: true,
-    send_page_view: true
+    send_page_view: true,
+    ...analyticsInternalTrafficParams
   });
 
   requestGa4ScriptLoad = () => {
@@ -231,6 +251,15 @@ if (/^GTM-[A-Z0-9]+$/i.test(gtmContainerId) && !window.__digitalPresenceGtmLoade
   gtmScript.async = true;
   gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmContainerId)}`;
   document.head.appendChild(gtmScript);
+}
+
+if (getPageType() === "agendamento_gbp") {
+  sendAnalyticsEvent("gbp_booking_landing_view", {
+    event_category: "acquisition",
+    event_label: "Agendamento via Perfil da Empresa",
+    funnel_step: "booking_landing",
+    source_channel: "google_business_profile"
+  });
 }
 
 const trackAdministrativeAction = (eventName, element, event = null) => {
